@@ -4,10 +4,14 @@ import getopt
 import random
 import sys
 import time
+import numpy as np
 
 from evaluator import writeNameAndScore, normProbs
 from Spatium import featureSelection, mergeToProfile, l1Distance
-from WordDict import dictFromFile, getListListPANAndFoldersPAN
+from WordDict import dictFromFile, getListListPANAndFoldersPAN, file_contents
+
+from features_categories import *
+from collections import Counter
 
 print "Read panAV.py"
 
@@ -23,7 +27,7 @@ def processAll(aListOfFile):
     for aFile in aListOfFile:
         texts = []
         for aText in aFile:
-            texts.append(dictFromFile(aText))
+            texts.append(file_contents(aText))
         wLists.append(texts)
     return wLists
 
@@ -35,53 +39,50 @@ def processSamples(aListOfSamples):
     return wLists
 
 
-def runIt():
-    print len(allKnownDocs)
+def phi_calculation(d, doc_questioned, feature):
+    d_set = Counter(d.split())
+    doc_questioned_set = Counter(doc_questioned.split())
+    f_set = feature(d)
 
+    final_set = []
+
+    # TODO: Could be len(d.slit()) instead
+    for (key, value) in doc_questioned_set.iteritems():
+        f_count = sum([d_set[token] for token in f_set if d_set.has_key(token)])
+        final_set.append(float(value)/(f_count - len(d.split())))
+
+    return final_set
+
+def dist(x, y):
+    """ Distance between two feature vectors """
+    return np.sum(abs(np.array(x) - np.array(y)))
+
+def sim(x, y):
+    """ Similarity between two feature vectors """
+    return float(1)/(1+dist(x, y))
+
+
+def runIt():
     myProbs = []
     myNewProbs = []
     t = 0.025
-    for i in range(len(allKnownDocs)):
-        # print i, foldersPAN[i]
-        res = []
-        aWordList = featureSelection(allUnknownDocs[i], wLen)
-        for _ in range(int(compNo)):
-            docs = [allKnownDocs[i]]
-            choice = range(len(aListListPAN))
-            del choice[i]
-            random.shuffle(choice)
-            notChosen = choice[:]
-            for r in choice:
-                if (len(allKnownDocs[r]) > 0 and
-                        len(aListListPAN[r]) == len(aListListPAN[i])):
-                    docs.append(allKnownDocs[r])
-                    del notChosen[notChosen.index(r)]
-            docs = docs[:randCompare+1]
-            r = 0
-            while len(docs) <= randCompare:
-                docs.append(allKnownDocs[notChosen[r]])
-                r += 1
+    import pdb
+    for (known, unknown) in zip(allKnownDocs, allUnknownDocs):
+        d_known = " ".join(known)
+        d_unknown = " ".join(unknown)
 
-            profiles = mergeToProfile(docs)
-            d = l1Distance(profiles, allUnknownDocs[i], aWordList)
+        f_known = phi_calculation(d_known, d_unknown, f2)
+        f_unknown = phi_calculation(d_unknown, d_unknown, f2)
 
-            dd = d[:]
-            dd[0] = float("inf")
-            if min(d) == d[0]:
-                if min(dd)/d[0] > 1.0+t:
-                    res.append(round(min(dd)/d[0], 2))
-                else:
-                    res.append(1.0)
-            elif min(d)/d[0] < 1.0-t and min(d) != 0:
-                res.append(round(min(d)/d[0], 2))
-            else:
-                res.append(1.0)
+        print dist(f_known, f_unknown)
+        print sim(f_known, f_unknown)
 
-        myProbs.append(sum(res)/compNo)
+        # print f_known
+        # break
 
-    myProbs = normProbs(myProbs, t)
-    aName = "answers"
-    writeNameAndScore(foldersPAN, myProbs, outputFolder, aName)
+    # myProbs = normProbs(myProbs, t)
+    # aName = "answers"
+    # writeNameAndScore(foldersPAN, myProbs, outputFolder, aName)
 
 
 if __name__ == '__main__':
