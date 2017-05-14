@@ -1,11 +1,24 @@
 # -*- coding: utf-8 -*-
 
 import os
+import re
 
 from collections import Counter
 
 print "Read WordDict.py"
 
+def preprocess(s):
+    regex = re.compile(r"\d+")
+    s_new = regex.sub(' ', s)
+    regex = re.compile(r"\s+")
+    s_new = regex.sub(' ', s_new)
+
+    return s_new
+
+def file_contents(aFileName):
+    with open(aFileName) as inFile:
+        listsOfWords = preprocess(inFile.read())
+    return listsOfWords
 
 def dictFromFile(aFileName):
     with open(aFileName) as inFile:
