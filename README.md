@@ -1,7 +1,6 @@
 # Authorship Verification
 
-This repository contains the software for an unsupervised authorship verification model.  This system was used in the PAN Author Identification task at CLEF 2015.  The describing paper is available as a [PDF](http://ceur-ws.org/Vol-1391/28-CR.pdf "Paper").
-
+This repository contains implementation of a DFRWS 2016 Europe article "Authorship verification for different languages, genres and topics". The describing paper is available as a [PDF](http://www.sciencedirect.com/science/article/pii/S1742287616000074).
 
 ## Usage
 
@@ -26,12 +25,3 @@ for example:
 - Python 2.7.12
 - The PAN data, available here to [download](http://pan.webis.de/clef15/pan15-web/author-identification.html "corpus")
 
-
-## Notes
-
-This repository will soon contain all my models from my participation in the various PAN tasks.
-
-- Authorship Verification
-- Author Profiling
-- Author Profiling cross-genre
-- Author Clustering
